@@ -1,21 +1,45 @@
-#include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
-#include "../includes/constants.h"
+#include "../includes/utilities.h"
 #include "../includes/fileio.h"
 
-bool openFile(std::fstream& myfile, const std::string& myFileName,
-		std::ios_base::openmode mode = std::ios_base::in){
-	return false;
+using namespace std;
+using namespace constants;
+
+
+//opens file
+bool openFile(fstream& myfile, const string& myFileName,
+		ios_base::openmode mode){
+	myfile.open(myFileName,mode);
+	if (myfile.is_open()){return true;}
+	else{return false;}
 }
 
-void closeFile(std::fstream& myfile){
+//close file if open
 
+void closeFile(fstream& myfile){
+	if(myfile.is_open()){
+		myfile.close();}
+	}
+
+int writetoFile(vector<entry>  &entries,
+		const string &outputfilename){
+	fstream output;
+	openFile(output, outputfilename, ios_base::out);
+	if(!output.is_open()){
+		return FAIL_FILE_DID_NOT_OPEN;
+	}
+	if(entries.size()==0){
+		return FAIL_NO_ARRAY_DATA;
+	}
+	for(int i =0; i<entries.size(); i++){
+	output<<entries[i].word<<" "<<intToString(entries[i].number_occurences)<<endl;
+	}
+	closeFile(output);
+	return SUCCESS;
 }
 
-int writetoFile(std::vector<constants::entry>  &entries, const std::string &outputfilename){
-	return -1;
-}

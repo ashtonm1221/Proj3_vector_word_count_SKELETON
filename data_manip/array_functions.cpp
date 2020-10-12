@@ -2,50 +2,99 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
-#include <vector>
-#include "../includes/constants.h"
-#include "../includes/fileio.h"
+#include "../includes/array_functions.h"
+#include "../includes/utilities.h"
+
 using namespace std;
 using namespace constants;
 
 namespace KP{
-	//zero out vector that tracks words and their occurrences
-	void clear(std::vector<constants::entry>  &entries){
 
+
+	//zero out vector that tracks words and their occurrences
+	void clear(vector<entry>  &entries){
+		entries.clear() ;
 	}
 
 	//how many unique words are in the vector
-	int getSize(std::vector<constants::entry>  &entries){
-		return -1;
+	int getSize(vector<entry>  &entries){
+		return entries.size();
+
 	}
 
 	//get data at a particular location, if i>size() then get the last value in the vector
 	//(this is lazy, should throw an exception instead)
-	string getWordAt(std::vector<constants::entry>  &entries, int i){
-		return "";
+	string getWordAt(vector<entry>  &entries, int i){
+		if(i>entries.size()){
+			return intToString(entries[i].number_occurences);
+		}
+		return entries.at(i).word;
+
 	}
-	int getNumbOccurAt(std::vector<constants::entry>  &entries,int i){
-		return -1;
+
+	int getNumbOccurAt(vector<entry>  &entries,int i){
+		return entries.at(i).number_occurences;
 	}
 
 	/*loop through whole file, one line at a time
 	 * call processLine on each line from the file
 	 * returns false: myfstream is not open
 	 *         true: otherwise*/
-	bool processFile(std::vector<constants::entry>  &entries,std::fstream &myfstream){
-		return false;
+	bool processFile(vector<entry>  &entries,fstream &myfstream){
+		string ms;
+		while(myfstream.eof() == false){
+			if(!myfstream.is_open()){
+				return false;
+			}
+			getline(myfstream,ms);
+			processLine(entries,ms);
+		}
+		return true;
+
 	}
+
 
 	/*take 1 line and extract all the tokens from it
 	feed each token to processToken for recording*/
-	void processLine(std::vector<constants::entry>  &entries,std::string &myString){
-
+	void processLine(vector<entry>  &entries,string &myString){
+		stringstream s(myString);
+		string t;
+		while(getline(s,t,CHAR_TO_SEARCH_FOR)){
+			processToken(entries, t);
+		}
 	}
 
 	/*Keep track of how many times each token seen*/
-	void processToken(std::vector<constants::entry>  &entries,std::string &token){
+	void processToken(vector<entry>  &entries,string &token){
 
+		if(strip_unwanted_chars(token)==false){return;}
+		string s =token;
+		toUpper(s);
+		for(int i=0; i< entries.size() ; i++){
+			if(entries[i].word_uppercase== s){
+				entries[i].number_occurences ++;
+				return;
+			}
+		}
+		entry time ={token, s, 1};
+		if(token != " "){
+			entries.push_back(time);}
+
+
+
+	}
+
+	//these bools alow for sorting of the file
+	bool first(const entry& e1, const entry& e2){
+		return e1.word_uppercase > e2.word_uppercase;
+	}
+	bool second(const entry& e1, const entry& e2){
+			return e1.word_uppercase < e2.word_uppercase;
+	}
+	bool numOcur(const entry& e1, const entry& e2){
+				return e1.number_occurences > e2.number_occurences;
 	}
 
 	/*
@@ -54,7 +103,30 @@ namespace KP{
 	 * The presence of the enum implies a switch statement based on its value
 	 * See the course lectures and demo project for how to sort a vector of structs
 	 */
-	void sort(std::vector<constants::entry>  &entries, constants::sortOrder so){
+	void sort(vector<entry>  &entries, sortOrder so){
+
+		switch(so){
+		case
+			(sortOrder::ASCENDING):
+			sort(entries.begin(), entries.end(), second);
+			break;
+
+
+		case
+			(sortOrder::DESCENDING):
+			sort(entries.begin(), entries.end(), first);
+			break;
+
+		case
+			(sortOrder::NUMBER_OCCURRENCES):
+			sort(entries.begin(), entries.end(), numOcur);
+			break;
+		case
+			(sortOrder::NONE):
+			break;
+
+		}
+
 
 	}
 }
